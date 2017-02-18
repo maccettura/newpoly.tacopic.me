@@ -17,56 +17,53 @@ namespace Polypic.Generate
     {
         private static readonly Random Random = new Random();
         private static readonly AssemblyName AssemblyName = new AssemblyName("Polypic.Generate");
+        private static readonly Configuration Configuration = new Configuration();
 
         public static async Task<Tuple<string, byte[]>> GenerateAsync(ImageRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request.Color1))
-            {
-                //Generate random hex
-                request.Color1 = "FF0011";                
-            }
-            if (string.IsNullOrWhiteSpace(request.Color2))
-            {
-                //Generate random hex
-                request.Color2 = "00DD13";
-            }
+            Configuration.AddImageFormat(new JpegFormat());
 
             Tuple<int, int>[,] verticies = await GenerateVerticiesAsync(request.Width, request.Height, request.Steps);
 
-            using (Image image = await GenerateImageAsync(request.Width, request.Height, Color.FromHex(request.Color1), Color.FromHex(request.Color2), verticies))
-            using (Image newImage = await BlendGrainAsync(image))
+            IImageFormat format;
+            switch (request.Source)
+            {
+
+                case "gif":
+                    format = new GifFormat();
+                    break;
+                case "png":
+                    format = new PngFormat();
+                    break;
+                case "jpg":
+                case "jpeg":
+                default:
+                    format = new JpegFormat();
+                    break;
+            }
+            using (Image image = await GenerateImageAsync(request, verticies))
+            using (Image<Color> newImage = await BlendGrainAsync(image))
             using (var ms = new MemoryStream())
             {
-                IImageFormat format;
-                switch (request.Source)
-                {
-                    case "gif":
-                        format = new GifFormat();
-                        break;
-                    case "png":
-                        format = new PngFormat();
-                        break;
-                    case "jpg":
-                    case "jpeg":
-                    default:
-                        format = new JpegFormat();
-                        break;
-                }
-                newImage.Save(ms, format);
+                newImage.SaveAsJpeg(ms, 90);
                 return new Tuple<string, byte[]>("image/jpeg", ms.ToArray());
-            }                        
+            }            
         }
 
+        
         #region Image Draw
 
-        private static async Task<Image> GenerateImageAsync(int width, int height, Color color1, Color color2, Tuple<int, int>[,] points)
+        private static async Task<Image> GenerateImageAsync(ImageRequest request, Tuple<int, int>[,] points)
         {
-            return await Task.FromResult(GenerateImage(width, height, color1, color2, points));
+            return await Task.FromResult(GenerateImage(request, points));
         }
 
-        private static Image GenerateImage(int width, int height, Color color1, Color color2, Tuple<int, int>[,] points)
+        private static Image GenerateImage(ImageRequest request, Tuple<int, int>[,] points)
         {
-            var image = new Image(width, height);
+            Color color1 = Color.FromHex(request.Color1);
+            Color color2 = Color.FromHex(request.Color2);
+
+            var image = new Image(request.Width, request.Height, Configuration);
 
             for (var x = 0; x < points.GetLength(0); x++)
             {
@@ -99,18 +96,17 @@ namespace Polypic.Generate
 
         #region Grain Blend
 
-        public static async Task<Image> BlendGrainAsync(Image image)
+        public static async Task<Image<Color>> BlendGrainAsync(Image image)
         {
             return await Task.FromResult(BlendGrain(image));
         }
 
-        public static Image BlendGrain(Image image)
+        public static Image<Color> BlendGrain(Image image)
         {
             using (Stream resourceStream = Assembly.Load(AssemblyName).GetManifestResourceStream("Polypic.Generate.grain.jpg"))
+            using(var grainImage = new Image(resourceStream))
             {
-                var size = new Size(image.Width, image.Height);
-
-                return (Image)image.DrawImage(new Image(resourceStream), 5, size, default(Point));
+                return image.DrawImage(grainImage, 75, new Size(image.Width, image.Height), default(Point));
             }
         }
 
