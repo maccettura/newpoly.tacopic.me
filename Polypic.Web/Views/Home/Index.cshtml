@@ -1,0 +1,77 @@
+﻿@*@model Polypic.Web.Models.ViewModels.IndexViewModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="row">
+    <div class="col-md-3">
+        <h2>Inputs</h2>
+        <ul>
+            <li>Width: @Model.Width</li>
+            <li>Height: @Model.Height</li>
+            <li>Steps: @Model.Steps</li>
+            <li>Color 1: @Model.Color1</li>
+            <li>Color 2: @Model.Color2</li>
+        </ul>
+        
+        
+
+    </div>
+</div>
+@if (Model.Map != null)
+{
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table">
+                <tbody>
+                @for (var x = 0; x < Model.Map.GetLength(0); x++)
+                {
+                    <tr>
+                        @for (var y = 0; y < Model.Map.GetLength(1); y++)
+                        {
+                            <td>x: @Model.Map[x, y].Item1 y: @Model.Map[x, y].Item2</td>
+                        }
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <canvas id="c" width="@Model.Width" height="@Model.Height" ></canvas>
+        </div>
+    </div>
+}
+<script>
+    var c2 = document.getElementById('c').getContext('2d');
+
+    @for (var x = 0; x < Model.Map.GetLength(0); x++)
+    {
+        for (var y = 0; y < Model.Map.GetLength(1); y++)
+        {
+            if (x + 1 < Model.Map.GetLength(0) && y + 1 < Model.Map.GetLength(1))
+            {
+                <text>
+                    c2.fillStyle = '#f00';
+                    c2.beginPath();
+                    c2.moveTo(@Model.Map[x, y].Item1, @Model.Map[x, y].Item2);
+                    c2.lineTo(@Model.Map[x + 1, y].Item1, @Model.Map[x + 1, y].Item2);
+                    c2.lineTo(@Model.Map[x , y + 1].Item1, @Model.Map[x, y + 1].Item2);
+                    c2.lineTo(@Model.Map[x, y].Item1, @Model.Map[x, y].Item2);
+                    c2.closePath();
+                    c2.fill();
+                    c2.fillStyle = '#0f0';
+                    c2.beginPath();
+                    c2.moveTo(@Model.Map[x + 1, y].Item1, @Model.Map[x + 1, y].Item2);
+                    c2.lineTo(@Model.Map[x + 1, y + 1].Item1, @Model.Map[x + 1, y + 1].Item2);
+                    c2.lineTo(@Model.Map[x, y + 1].Item1, @Model.Map[x, y + 1].Item2);
+                    c2.lineTo(@Model.Map[x + 1, y].Item1, @Model.Map[x + 1, y].Item2);
+                    c2.closePath();
+                    c2.fill();
+                </text>
+            }
+        }
+    }
+</script>*@

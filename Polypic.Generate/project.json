@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0-*",
+
+  "buildOptions": {
+    "embed": [ "grain.jpg" ]
+  },
+
+  "dependencies": {
+    "ImageSharp": "1.0.0-alpha2-00075",
+    "ImageSharp.Drawing": "1.0.0-alpha2-00075",
+    "ImageSharp.Drawing.Paths": "1.0.0-alpha2-00025",
+    "ImageSharp.Formats.Gif": "1.0.0-alpha2-00077",
+    "ImageSharp.Formats.Jpeg": "1.0.0-alpha2-00075",
+    "ImageSharp.Formats.Png": "1.0.0-alpha2-00071",
+    "NETStandard.Library": "1.6.0"
+  },
+
+  "frameworks": {
+    "netstandard1.6": {
+      "imports": "dnxcore50"
+    }
+  }
+}
