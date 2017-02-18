@@ -51,6 +51,7 @@ namespace Polypic.Web
 
             app.UseMvc(routes =>
             {
+                //TODO: Find a better way to define these routes lol
                 //full
 
                 routes.MapRoute(

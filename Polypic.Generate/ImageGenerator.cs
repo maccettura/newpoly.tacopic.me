@@ -99,12 +99,12 @@ namespace Polypic.Generate
 
         #region Grain Blend
 
-        public static async Task<Image> BlendGrainAsync(Image<Color> image)
+        public static async Task<Image> BlendGrainAsync(Image image)
         {
             return await Task.FromResult(BlendGrain(image));
         }
 
-        public static Image BlendGrain(Image<Color> image)
+        public static Image BlendGrain(Image image)
         {
             using (Stream resourceStream = Assembly.Load(AssemblyName).GetManifestResourceStream("Polypic.Generate.grain.jpg"))
             {
