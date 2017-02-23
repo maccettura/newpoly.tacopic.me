@@ -13,7 +13,7 @@ namespace Polypic.Generate
     {
         private static readonly Random Random = new Random();
         private static readonly AssemblyName AssemblyName = new AssemblyName("Polypic.Generate");
-        private static Configuration Configuration = new Configuration();
+        private static readonly Configuration Configuration = new Configuration();
 
         public static async Task<Tuple<string, byte[]>> GenerateAsync(ImageRequest request)
         {
@@ -43,7 +43,7 @@ namespace Polypic.Generate
                     case "jpg":
                     case "jpeg":
                     default:
-                        newImage.SaveAsJpeg(ms, 90);
+                        newImage.SaveAsJpeg(ms, new JpegEncoderOptions() { Quality = 90 });
                         mimeType = "image/jpeg";
                         break;
                 }                
@@ -91,7 +91,7 @@ namespace Polypic.Generate
             }
             using (var outputStream = new MemoryStream())
             {
-                image.Save(outputStream);
+                image.SaveAsJpeg(outputStream, new JpegEncoderOptions() { Quality = 100 });
                 outputStream.Position = 0;
                 return new Image(outputStream);
             }
@@ -113,12 +113,6 @@ namespace Polypic.Generate
             {
                 return image.DrawImage(grainImage, 5, new Size(image.Width, image.Height), default(Point));
             }
-            //using (var outputStream = new MemoryStream())
-            //{
-            //    image.DrawImage(grainImage, 5, new Size(image.Width, image.Height), default(Point)).Save(outputStream);
-            //    outputStream.Position = 0;
-            //    return new Image(outputStream);
-            //}
         }
 
         #endregion
