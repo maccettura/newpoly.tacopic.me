@@ -6,12 +6,12 @@
   },
 
   "dependencies": {
-    "ImageSharp": "1.0.0-alpha2-00075",
-    "ImageSharp.Drawing": "1.0.0-alpha2-00075",
-    "ImageSharp.Drawing.Paths": "1.0.0-alpha2-00025",
-    "ImageSharp.Formats.Gif": "1.0.0-alpha2-00077",
-    "ImageSharp.Formats.Jpeg": "1.0.0-alpha2-00075",
-    "ImageSharp.Formats.Png": "1.0.0-alpha2-00071",
+    "ImageSharp": "1.0.0-alpha2-00115",
+    "ImageSharp.Drawing": "1.0.0-alpha2-00115",
+    "ImageSharp.Drawing.Paths": "1.0.0-alpha2-00065",
+    "ImageSharp.Formats.Gif": "1.0.0-alpha2-00115",
+    "ImageSharp.Formats.Jpeg": "1.0.0-alpha2-00115",
+    "ImageSharp.Formats.Png": "1.0.0-alpha2-00111",
     "NETStandard.Library": "1.6.0"
   },
 
