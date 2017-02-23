@@ -2,14 +2,10 @@
 using System.IO;
 using System.Numerics;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using ImageSharp;
-using ImageSharp.Drawing;
 using ImageSharp.Formats;
-using ImageSharp.Processing;
 using Polypic.Generate.Model;
-
 
 namespace Polypic.Generate
 {
@@ -17,36 +13,41 @@ namespace Polypic.Generate
     {
         private static readonly Random Random = new Random();
         private static readonly AssemblyName AssemblyName = new AssemblyName("Polypic.Generate");
-        private static readonly Configuration Configuration = new Configuration();
+        private static Configuration Configuration = new Configuration();
 
         public static async Task<Tuple<string, byte[]>> GenerateAsync(ImageRequest request)
         {
             Configuration.AddImageFormat(new JpegFormat());
+            if (request.IsEmptyColors())
+            {
+                request = LoadRandomColorPair(request);
+            }
 
             Tuple<int, int>[,] verticies = await GenerateVerticiesAsync(request.Width, request.Height, request.Steps);
 
-            IImageFormat format;
-            switch (request.Source)
-            {
-
-                case "gif":
-                    format = new GifFormat();
-                    break;
-                case "png":
-                    format = new PngFormat();
-                    break;
-                case "jpg":
-                case "jpeg":
-                default:
-                    format = new JpegFormat();
-                    break;
-            }
             using (Image image = await GenerateImageAsync(request, verticies))
             using (Image<Color> newImage = await BlendGrainAsync(image))
             using (var ms = new MemoryStream())
             {
-                newImage.SaveAsJpeg(ms, 90);
-                return new Tuple<string, byte[]>("image/jpeg", ms.ToArray());
+                string mimeType;
+                switch (request.Source)
+                {
+                    case "gif":
+                        newImage.SaveAsGif(ms);
+                        mimeType = "image/gif";
+                        break;
+                    case "png":
+                        newImage.SaveAsPng(ms);
+                        mimeType = "image/png";
+                        break;
+                    case "jpg":
+                    case "jpeg":
+                    default:
+                        newImage.SaveAsJpeg(ms, 90);
+                        mimeType = "image/jpeg";
+                        break;
+                }                
+                return new Tuple<string, byte[]>(mimeType, ms.ToArray());
             }            
         }
 
@@ -88,8 +89,12 @@ namespace Polypic.Generate
                     }
                 }
             }
-
-            return image;
+            using (var outputStream = new MemoryStream())
+            {
+                image.Save(outputStream);
+                outputStream.Position = 0;
+                return new Image(outputStream);
+            }
         }
 
         #endregion
@@ -104,10 +109,16 @@ namespace Polypic.Generate
         public static Image<Color> BlendGrain(Image image)
         {
             using (Stream resourceStream = Assembly.Load(AssemblyName).GetManifestResourceStream("Polypic.Generate.grain.jpg"))
-            using(var grainImage = new Image(resourceStream))
+            using (var grainImage = new Image(resourceStream))
             {
-                return image.DrawImage(grainImage, 75, new Size(image.Width, image.Height), default(Point));
+                return image.DrawImage(grainImage, 5, new Size(image.Width, image.Height), default(Point));
             }
+            //using (var outputStream = new MemoryStream())
+            //{
+            //    image.DrawImage(grainImage, 5, new Size(image.Width, image.Height), default(Point)).Save(outputStream);
+            //    outputStream.Position = 0;
+            //    return new Image(outputStream);
+            //}
         }
 
         #endregion
@@ -156,6 +167,25 @@ namespace Polypic.Generate
         private static Color GetColor(byte r, byte g, byte b)
         {
             return new Color(r, g, b);
+        }
+
+        #endregion
+
+        #region MyRegion
+
+        private static ImageRequest LoadRandomColorPair(ImageRequest request)
+        {
+            string hex1 = string.Empty;
+            string hex2 = string.Empty;
+            for (var i = 0; i < 6; i++)
+            {
+                int val = Random.Next(0, 15);
+                hex1 += val.ToString("X");
+                hex2 += (15 - val).ToString("X");
+            }
+            request.Color1 = hex1;
+            request.Color2 = hex2;
+            return request;
         }
 
         #endregion

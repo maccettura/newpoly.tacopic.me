@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Polypic.Generate.Utilities;
 
 namespace Polypic.Generate.Model
 {
@@ -13,5 +10,16 @@ namespace Polypic.Generate.Model
         public string Color1 { get; set; }
         public string Color2 { get; set; }
         public string Source { get; set; }
+
+
+        public bool IsEmptyColors()
+        {
+            return string.IsNullOrWhiteSpace(Color1) && string.IsNullOrWhiteSpace(Color2);
+        }
+
+        public bool IsValidColors()
+        {
+            return Color1.IsHexColor() && Color2.IsHexColor();
+        }
     }
 }
